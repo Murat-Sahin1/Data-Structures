@@ -21,12 +21,31 @@ void add(int **first_cell, int newInt) {
       printf("%d ", newArr[i]);
     }
     // Does this free every cell in array?
-    // free(first_cell);
+    free(*first_cell);
     *first_cell = newArr;
   }
   (*first_cell)[length] = newInt;
   length++;
   printf("\nAdded %d into the array.", (*first_cell)[length - 1]);
+}
+
+void deleteAt(int **first_cell, int index) {
+  if ((index < 0) || (index >= capacity)) {
+    printf("\nIndex out of bounds.");
+    return;
+  }
+  int *newArr = (int *)malloc((length - 1) * sizeof(int));
+  for (int i = 0, j = 0; i < length; i++, j++) {
+    if (i == index) {
+      j--;
+    } else {
+      newArr[j] = (*first_cell)[i];
+    }
+  }
+  free(*first_cell);
+  *first_cell = newArr;
+  length = length - 1;
+  capacity = length;
 }
 
 void test_fill_the_array(int *first_cell) {
@@ -39,25 +58,24 @@ void test_fill_the_array(int *first_cell) {
 
 int get(int *first_cell, int index) {
   if ((index < 0) || (index > capacity)) {
-    exit(1);
+    printf("Index out of bounds.");
+    return 0;
   }
-
   for (int i = 0; i < capacity; i++) {
     if (i == index) {
       return first_cell[i];
     }
   }
-
   return 0;
 }
 
-void print_array(int *first_cell) {
-  printf("\nFull array: [%d", first_cell[0]);
+void print_array(int **first_cell) {
+  printf("\nFull array: [%d", *first_cell[0]);
   for (int i = 1; i < length; ++i) {
     printf(",");
-    printf("%d", first_cell[i]);
+    printf("%d", (*first_cell)[i]);
   }
-  printf("]\n");
+  printf("]");
 }
 
 void to_infinity_and_beyond(int **first_cell) {
@@ -67,7 +85,7 @@ void to_infinity_and_beyond(int **first_cell) {
     // if (c == 'e')
     //   break;
     add(first_cell, i);
-    print_array(*first_cell);
+    print_array(first_cell);
     i++;
   }
 }
@@ -91,14 +109,45 @@ int main() {
   print_capacity();
   printf("\nCurrent size: %d\n", get_length());
 
-  // add(&root, 0);
-  // add(&root, 1);
-  // add(&root, 2);
+  add(&root, 1);
+  add(&root, 2);
+  add(&root, 3);
+  add(&root, 4);
+  add(&root, 5);
+  add(&root, 6);
+  add(&root, 7);
+  add(&root, 8);
+  add(&root, 9);
 
-  to_infinity_and_beyond(&root);
+  // to_infinity_and_beyond(&root);
 
-  // print_array(root);
+  print_array(&root);
+  print_capacity();
+  printf("\nCurrent Length: %d", get_length());
 
+  deleteAt(&root, 8);
+
+  print_array(&root);
+  print_capacity();
+  printf("\nCurrent Length: %d", get_length());
+
+  deleteAt(&root, 8);
+  print_array(&root);
+  print_capacity();
+  printf("\nCurrent Length: %d", get_length());
+
+  deleteAt(&root, 0);
+  print_array(&root);
+  print_capacity();
+  printf("\nCurrent Length: %d", get_length());
+
+  add(&root, 10);
+  add(&root, 11);
+  add(&root, 12);
+
+  print_array(&root);
+  print_capacity();
+  printf("\nCurrent Length: %d", get_length());
   // printf("\n%d\n", root[0]);
   // printf("\n%d\n", root[1]);
   // printf("\n%d\n", root[2]);
