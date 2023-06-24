@@ -48,6 +48,14 @@ void deleteAt(int **first_cell, int index) {
   capacity = length;
 }
 
+void delete(int **first_cell, int item) {
+  for (int i = 0; i < length; i++) {
+    if ((*first_cell)[i] == item) {
+      deleteAt(first_cell, i);
+    }
+  }
+}
+
 void test_fill_the_array(int *first_cell) {
   for (int i = 0; i < capacity; i++) {
     first_cell[i] = i;
@@ -151,7 +159,10 @@ int main() {
   // printf("\n%d\n", root[0]);
   // printf("\n%d\n", root[1]);
   // printf("\n%d\n", root[2]);
-
+  delete (&root, 7);
+  print_array(&root);
+  print_capacity();
+  printf("\nCurrent Length: %d", get_length());
   // print_capacity();
   // printf("\nCurrent size: %d\n", get_length());
 
