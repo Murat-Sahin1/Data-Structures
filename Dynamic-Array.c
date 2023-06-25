@@ -77,6 +77,31 @@ int get(int *first_cell, int index) {
   return 0;
 }
 
+int indexOf(int **first_cell, int item) {
+  for (int i = 0; i < length; i++) {
+    if ((*first_cell)[i] == item) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+bool contains(int **first_cell, int item) {
+  for (int i = 0; i < length; i++) {
+    if ((*first_cell)[i] == item) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool clear(int **first_cell) {
+  for (int i = 0; i < length; i++) {
+    (*first_cell)[i] = 0;
+  }
+  return true;
+}
+
 void print_array(int **first_cell) {
   printf("\nFull array: [%d", *first_cell[0]);
   for (int i = 1; i < length; ++i) {
