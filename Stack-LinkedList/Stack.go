@@ -31,18 +31,29 @@ func (r *RootNode) populateList() {
 	}
 }
 
-func (r *RootNode) printList() {
+// NOTE: PrintList pushes each func call to the stack per iteration
+// then executes with LIFO order.
+func (r *RootNode) printStack() {
 	var tempNode *Node = &Node{value: r.value, next: r.next}
 	for ; tempNode != nil; tempNode = tempNode.next {
-		fmt.Println("Node Value:", tempNode.value)
+		defer fmt.Println("Node Value:", tempNode.value)
 	}
 }
 
 func (r *RootNode) push(newNode *Node) bool {
+	if r.prev == nil {
+		fmt.Println("Last element of the stack is null. Terminating...")
+		return false
+	}
 	r.prev.next = newNode
 	r.prev = r.prev.next
 	return true
 }
+
+// TODO: In order to implement the pop functionality,
+// last two nodes need to have previous pointer
+// func (r *RootNode) pop() *Node {
+// }
 
 func (r *RootNode) printTopOfStack() {
 	fmt.Println("Top of the stack:", r.prev.value)
@@ -71,7 +82,7 @@ func main() {
 
 	root.push(myNewNode)
 	// root.printList()
-	// root.printTopOfStack()
+	root.printTopOfStack()
 	root.addRange()
-	root.printList()
+	root.printStack()
 }
