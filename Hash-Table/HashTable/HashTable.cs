@@ -19,45 +19,56 @@ public class HashTable
         {
             size = 5;
         }
+
         _capacity = size;
         _baseArray = new BaseHashTableEntry[size];
     }
 
     public bool Set(string? key, object value)
     {
-        if (key == null)
+        if (key == null) return false;
+
+        if (onThreshold()) doubleTheBaseArrayCapacity();
+
+        var arrayIndex = hashFunction(key);
+
+        var newEntry = new CollidedHashTableEntry
         {
-            return false;
-        }
+            Key = key,
+            Value = value,
+            NextEntry = null
+        };
         
-        if (onThreshold())
-        {
-            doubleTheBaseArrayCapacity();
-        }
-        
-        var newEntry = new BaseHashTableEntry { key = key, value = value };
-        var arrayIndex = hashFunction(newEntry.key);
         if (checkCollision(arrayIndex))
         {
             var collidedItem = _baseArray[arrayIndex];
             Type collidedItemType = collidedItem.GetType();
+            
             if (collidedItemType == typeof(NormalHashTableEntry))
             {
                 // Turn NormalHashTableEntry into CollidedHashTableEntry
-                var collidedEntry = new CollidedHashTableEntry 
+                var newCollidedHashTableEntry = new CollidedHashTableEntry
                 {
-                    key = collidedItem.key,
-                    value = collidedItem.value,
-                    nextEntry = newEntry
+                    Key = collidedItem.Key,
+                    Value = collidedItem.Value,
+                    NextEntry = newEntry
                 };
-                _baseArray[arrayIndex] = collidedEntry;
+
+                _baseArray[arrayIndex] = newCollidedHashTableEntry;
             }
-            else
+            else if (collidedItemType == typeof(CollidedHashTableEntry))
             {
-                // TODO: Iterate over the elements of collided entries
+                if (collidedItem is CollidedHashTableEntry collidedEntry)
+                {
+                    collidedEntry.AddCollision(newEntry);
+                }
             }
         }
-        _baseArray[arrayIndex] = newEntry;
+        else
+        {
+            _baseArray[arrayIndex] = newEntry;
+        }
+
         return true;
     }
 
@@ -67,11 +78,13 @@ public class HashTable
         {
             throw new NotImplementedException();
         }
+
         var hash = 0;
         for (var i = 0; i < key.Length; i++)
         {
             hash = (hash + key.ElementAt(i) * i) % _baseArray.Length;
         }
+
         return hash;
     }
 
@@ -106,6 +119,6 @@ public class HashTable
     private bool checkCollision(int newIndex)
     {
         var retrievedItem = _baseArray[newIndex];
-        return retrievedItem.key != null;
+        return retrievedItem.Key != null;
     }
 }
