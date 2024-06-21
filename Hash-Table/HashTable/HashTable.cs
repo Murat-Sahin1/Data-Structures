@@ -1,5 +1,4 @@
-﻿using HashTable.HashTableEntities;
-using HashTable.HashTableEntities.Common;
+﻿using HashTable.HashTableEntities.Common;
 
 namespace HashTable;
 
@@ -12,13 +11,11 @@ public class HashTable
     private BaseHashTableEntry[] _baseArray;
     private int _capacity;
     private const int SIZE_MULTIPLIER = 2;
+    private const int MIN_SIZE = 5;
 
     public HashTable(int size)
     {
-        if (size < 5)
-        {
-            size = 5;
-        }
+        if (size < MIN_SIZE) size = MIN_SIZE;
 
         _capacity = size;
         _baseArray = new BaseHashTableEntry[size];
@@ -32,18 +29,19 @@ public class HashTable
 
         var arrayIndex = hashFunction(key);
 
-        var newEntry = new CollidedHashTableEntry
-        {
-            Key = key,
-            Value = value,
-            NextEntry = null
-        };
-        
         if (checkCollision(arrayIndex))
         {
+            // Last item in the linked list
+            var newEntry = new CollidedHashTableEntry
+            {
+                Key = key,
+                Value = value,
+                NextEntry = null
+            };
+
             var collidedItem = _baseArray[arrayIndex];
             Type collidedItemType = collidedItem.GetType();
-            
+
             if (collidedItemType == typeof(NormalHashTableEntry))
             {
                 // Turn NormalHashTableEntry into CollidedHashTableEntry
@@ -56,17 +54,18 @@ public class HashTable
 
                 _baseArray[arrayIndex] = newCollidedHashTableEntry;
             }
-            else if (collidedItemType == typeof(CollidedHashTableEntry))
+            else if (collidedItem is CollidedHashTableEntry collidedEntry)
             {
-                if (collidedItem is CollidedHashTableEntry collidedEntry)
-                {
-                    collidedEntry.AddCollision(newEntry);
-                }
+                collidedEntry.AddCollision(newEntry);
             }
         }
         else
         {
-            _baseArray[arrayIndex] = newEntry;
+            _baseArray[arrayIndex] = new NormalHashTableEntry
+            {
+                Key = key,
+                Value = value
+            };
         }
 
         return true;
@@ -97,7 +96,7 @@ public class HashTable
     private bool onThreshold()
     {
         var limit = (int)Math.Ceiling(_capacity * 0.7f);
-        return _baseArray.Length >= limit;
+        return _baseArray.Length <= limit;
     }
 
     private void doubleTheBaseArrayCapacity()
@@ -119,6 +118,6 @@ public class HashTable
     private bool checkCollision(int newIndex)
     {
         var retrievedItem = _baseArray[newIndex];
-        return retrievedItem.Key != null;
+        return retrievedItem != null;
     }
 }
