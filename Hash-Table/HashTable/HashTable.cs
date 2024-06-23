@@ -1,4 +1,5 @@
 ﻿using HashTable.HashTableEntities.Common;
+using HashTable.Exceptions;
 
 namespace HashTable;
 
@@ -71,6 +72,27 @@ public class HashTable
         return true;
     }
 
+    public BaseHashTableEntry Get(string? key)
+    {
+        if (key == null)
+            throw new ArgumentNullException(nameof(key), "Key cannot be null");
+
+        var hash = hashFunction(key);
+        var retrievedItem = _baseArray[hash];
+
+        if (retrievedItem == null)
+            throw new ItemNotFoundException();
+
+        if (areTypesEqual(retrievedItem, typeof(CollidedHashTableEntry)))
+        {
+            // TODO: HANDLE COLLISION
+        }
+        else if (areTypesEqual(retrievedItem, typeof(NormalHashTableEntry)))
+        {
+            return retrievedItem;
+        }
+    }
+
     private int hashFunction(string key)
     {
         if (key == null)
@@ -119,5 +141,11 @@ public class HashTable
     {
         var retrievedItem = _baseArray[newIndex];
         return retrievedItem != null;
+    }
+
+    private bool areTypesEqual(object a, Type b)
+    {
+        if (a.GetType() == b) return true;
+        else return false;
     }
 }
