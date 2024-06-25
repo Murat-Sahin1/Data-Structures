@@ -5,6 +5,6 @@
 /// </summary>
 public interface IHashTableEntry
 {
-   string? Key { get; init; }
-   object Value { get; set; }
+    string Key { get; init; }
+    object? Value { get; set; }
 }

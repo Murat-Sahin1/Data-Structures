@@ -1,6 +1,7 @@
 ﻿using HashTable.HashTableEntities.Common;
 using HashTable.HashTableEntities;
 using HashTable.Exceptions;
+using HashTable.Utility;
 
 namespace HashTable;
 
@@ -23,7 +24,7 @@ public class HashTable
         _baseArray = new BaseHashTableEntry[size];
     }
 
-    public bool Set(string? key, object value)
+    public bool Set(string key, object? value)
     {
         ArgumentNullException.ThrowIfNull(key);
 
@@ -38,7 +39,7 @@ public class HashTable
         {
             return handleCollisionAndAddItem(arrayIndex, key, value);
         }
-        
+
         _baseArray[arrayIndex] = new NormalHashTableEntry
         {
             Key = key,
@@ -47,7 +48,7 @@ public class HashTable
         return true;
     }
 
-    public (BaseHashTableEntry? entry, bool success) Get(string? key)
+    public (NormalHashTableEntry? entry, bool success) Get(string? key)
     {
         if (key == null)
             throw new ArgumentNullException(nameof(key), "Key cannot be null");
@@ -60,11 +61,6 @@ public class HashTable
 
     public int hashFunction(string key)
     {
-        if (key == null)
-        {
-            throw new NotImplementedException();
-        }
-
         var hash = 0;
         for (var i = 0; i < key.Length; i++)
         {
@@ -77,26 +73,24 @@ public class HashTable
     // TODO: Below two function has handleCollision functionality.
     // This could be refactored into a common method.
     // This also could be a static method.
-    private (BaseHashTableEntry? entry, bool success) handleCollisionAndGetItem(BaseHashTableEntry retrievedItem, string? key)
+
+    private (NormalHashTableEntry? entry, bool success) handleCollisionAndGetItem(BaseHashTableEntry retrievedItem, string key)
     {
-        if (key == null)
-            throw new ArgumentNullException($"Key cannot be null: {key}");
         switch (retrievedItem)
         {
             case null:
                 throw new ItemNotFoundException();
             case CollidedHashTableEntry collidedEntry:
-                return collidedEntry.GetEntryWithKey(key);
-            case NormalHashTableEntry:
-                return (retrievedItem, true);
+                return GetEntryWithKey(collidedEntry, key);
+            case NormalHashTableEntry normalEntry:
+                return (normalEntry, true);
             default:
                 throw new InvalidCastException();
         }
     }
 
-    private bool handleCollisionAndAddItem(int arrayIndex, string? key, object value)
+    private bool handleCollisionAndAddItem(int arrayIndex, string key, object? value)
     {
-        ArgumentNullException.ThrowIfNull(key);
         // Last item in the linked list
         var newEntry = new CollidedHashTableEntry
         {
@@ -123,7 +117,7 @@ public class HashTable
                     return true;
                 }
             case CollidedHashTableEntry collidedEntry:
-                return collidedEntry.AddCollision(newEntry);
+                return AddCollision(collidedEntry, newEntry);
             case null:
                 throw new ItemNotFoundException();
             default:
@@ -131,20 +125,44 @@ public class HashTable
         }
     }
 
+    private bool AddCollision(CollidedHashTableEntry collidedEntry, CollidedHashTableEntry newEntry)
+    {
+        CollidedHashTableEntry current = collidedEntry;
+
+        while (current.NextEntry != null)
+        {
+            current = current.NextEntry;
+        }
+        current.NextEntry = newEntry;
+        return true;
+    }
+
+    private (NormalHashTableEntry? entry, bool success) GetEntryWithKey(CollidedHashTableEntry collidedEntry, string key)
+    {
+        CollidedHashTableEntry? current = collidedEntry;
+        ArgumentNullException.ThrowIfNull(current);
+
+        do
+        {
+            ArgumentNullException.ThrowIfNull(current.Key);
+            if (current.Key == key)
+                return (TypeConverter.ConvertCollidedToNormal(current), true);
+
+            current = current.NextEntry;
+        } while (current != null);
+
+        return (null, false);
+    }
+
     private bool keyExistsInTheMap(string key)
     {
-        ArgumentNullException.ThrowIfNull(key);
-
         var retrievedItem = _baseArray[hashFunction(key)];
         switch (retrievedItem)
         {
             case null:
                 return false;
             case NormalHashTableEntry:
-                {
-                    if (retrievedItem.Key == key) return true;
-                    return false;
-                }
+                return retrievedItem.Key == key;
             case CollidedHashTableEntry collidedEntry:
                 {
                     var current = collidedEntry;

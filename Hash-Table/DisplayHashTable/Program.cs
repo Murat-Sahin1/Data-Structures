@@ -9,6 +9,7 @@ var test3 = hashTable.hashFunction("k1ey1");
 // Test of addition: Normal hash table entry 
 var firstTuple = Tuple.Create("1 Hello", 42, "First", "Tuple!");
 var success = hashTable.Set("key1", firstTuple);
+// var succssess = hashTable.Set("key1", firstTuple);
 Console.WriteLine(success);
 
 // Test of reforming: Turning normal hash table entry into collided hash table entry
@@ -37,10 +38,13 @@ var mySimpleItem = hashTable.Get("simple");
 
 // Test of Getting: Getting a collided first entry
 
+// TODO: Let these give Normal Entry
 var firstItem = hashTable.Get("key1").entry;
 
 var secondItem = hashTable.Get("ke4131y1").entry;
 
 var thirdItem = hashTable.Get("k1ey1").entry;
+
+var simple = hashTable.Get("simple").entry;
 
 Console.WriteLine(thirdItem);
